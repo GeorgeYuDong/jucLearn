@@ -1,52 +1,41 @@
-import java.util.concurrent.TimeUnit;
 
 public class Test {
+    private long count = 0;
 
-    public static void main(String[] args) {
-        Person person = new Person();
-        person.setName("ab");
-        System.out.println(person.getName());
+    private void add10K() {
+        int idx = 0;
+        while (idx++ < 10000000) {
+            count += 1;
+        }
+    }
 
-        person.setSchool("cd");
-        System.out.println(person.getSchool());
-
-        new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("china");
-            }
-            System.out.println("hello,world");
-        }).start();
-
-        new Thread(() -> {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("available cpu num is " + Runtime.getRuntime().availableProcessors());
-            }
-        }).start();
-
-        //Java开不了线程，通过调用本地方法(native method 底层的C++)调用
-
-        //New, RUNNABLE,BLOCKED, TIMED_WAITING, WAITING, TERMINATED
+    public static long calc() {
+        final Test test = new Test();
+        // 创建两个线程，执行add()操作
+        Thread th1 = new Thread(() -> {
+            test.add10K();
+        });
+        Thread th2 = new Thread(() -> {
+            test.add10K();
+        });
+        // 启动两个线程
+        th1.start();
+        th2.start();
+        // 等待两个线程执行结束
         try {
-            //睡一天
-            TimeUnit.SECONDS.sleep(1);
+            th1.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //137 6471 6656 官希标
-
-
+        try {
+            th2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return test.count;
     }
 
-
+    public static void main(String[] args) {
+        System.out.println(calc());
+    }
 }
